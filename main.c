@@ -14,15 +14,15 @@ int ep[] ={4 ,1 ,2 ,3 ,2 ,3 ,4 ,1};
 // }
 
 const char * leftShift(char text[], int shiftValue){
-  char * shiftedText = malloc(sizeof(char)*6);
+  char * shiftedText = malloc(sizeof(char)*5);
   int i;
-  for (i = 0; i <= 5-shiftValue; i++) {
-    shiftedText[i%5] = text[(i+1)%5];
+  for (i = 0; i < 5; i++) {
+    shiftedText[i%5] = text[(i+shiftValue)%5];
   }
-  shiftedText[i] = '\0';
+  // shiftedText[i] = '\0';
   return shiftedText;
 }
 int main(){
-		printf("The shiftedTex -> %s \n",leftShift("10000",1));
+		printf("The shiftedTex -> %s \n",leftShift("10000",2));
 		return 0;
 	}
