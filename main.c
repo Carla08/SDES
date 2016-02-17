@@ -9,6 +9,7 @@ int p8[] = {6,3,7,4,8,5,10,9};
 int iP[] ={2 ,6 ,3 ,1 ,4 ,8 ,5 ,7};
 int inverIP[] ={4 ,1 ,3 ,5 ,7 ,2 ,8 ,6};
 int ep[] ={4 ,1 ,2 ,3 ,2 ,3 ,4 ,1};
+int p4[] = {2,4,3,1};
 
 
 //LEFT SHIFT
@@ -88,6 +89,26 @@ char** KeyGenerator (char* key){
   keys_array[0] = key1;
   keys_array[1] = key2;
   return keys_array;
+}
+//FK MASTER FUNCTION /*WARNING: needs testing*/
+char** FK(char* left,char* right, key){
+  char *EP = permute(ep,8,right);
+  char *EPxorKey = xor(EP,key);
+  char *left_half = split(EPxorKey,true,8);
+  char *right_half = split(EPxorKey,false,8);
+  char *sLeft = sBox(S0, left_half);
+  char *sRight =  sBox(S1,right_half);
+  char *sJoin = concat(sLeft,sRight);
+  char *per4 = permute(p4,4,sJoin);
+  char *leftxorPer4 = xor(left, per4);
+  char **leftright_array = malloc(2 * sizeof(char*));
+  short i;
+  for (i = 0; i<2; i++){
+    leftright_array[i] = malloc(4*sizeof(char));
+  }
+  leftright_array[0] = leftxorPer4;
+  keys_array[1] = right;
+  return leftright_array;
 }
 //MAIN
 int main(){
