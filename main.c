@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 char key[] ="1100011110";
 int p10[10] = {3,5,2,7,4,10,1,9,8,6};
@@ -25,18 +26,21 @@ const char * leftShift(char text[], int shiftValue){
 }
 
 //SPLIT
-const char * split(char text[],bool keep_left, size_t strLenght) {
-  char * half_array = malloc(sizeof(char)*(strLenght/2));
+const char * split(char text[],bool keep_left, size_t strLenght)
+ {
+  short half_size = strLenght/2;
+  char * half_array = malloc(sizeof(char)*(strLenght/2+1));
   short i;
   if(keep_left){
-    for (i=0; i<strLenght/2; i++){
+    for (i=0; i<half_size; i++){
       half_array[i] = text[i];
     }
   } else {
-    for (i=strLenght/2; i<strLenght/2; i++){
-      half_array[i] = text[i];
+    for (i=half_size; i<strLenght; i++){
+      half_array[i%half_size] = text[i];
     }
   }
+  half_array[half_size] = '\0';
   return half_array;
 }
 
@@ -54,6 +58,7 @@ const char * permute(int p[],int plength, char * text){
 //MAIN
 int main(){
 		// printf("The shiftedTex -> %s \n",leftShift("10000",2));
-    printf("The permutated text -> %s\n",permute(p10, 10, key));
+    //printf("The permutated text -> %s\n",permute(p10, 10, key));
+    printf("Half array is %s\n",split("1100",false,4));
     return 0;
 	}
