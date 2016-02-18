@@ -88,6 +88,7 @@ int * bitToCoordinates (char * string){
   yString[0] = string[1];
   yString[1] = string[2];
   yString[2] ='\0';
+
   int x = bitToDecimal(xString);
   int y = bitToDecimal(yString);
   printf("Coordinates: x,y %d,%d\n", x,y);
@@ -165,27 +166,38 @@ char** FK(char* left,char* right, char* key){
 //ENCRYPT MASTER
 char * encrypt (char* plaintext, char * key){
   char *permutated_plain = permute(iP, 8, plaintext);
-  printf("PERMUTATED PLAIN: %s\n",permutated_plain);
   char **keys_array = KeyGenerator(key);
   char *left = split(permutated_plain,true,8);
-  printf("LEFT OF PERMUTATED PLAIN: %s\n", left);
   char *right = split(permutated_plain,false,8);
-  printf("RIGHT OF PERMUTATED PLAIN: %s\n", right);
   char *key1 = keys_array[0];
   char *key2 = keys_array[1];
-  printf("KEY1: %s\n KEY2: %s\n",keys_array[0],keys_array[1]);
   char **fk1 = FK(left,right,key1);
   //swap block
-  printf("BEFORE SWAP: LEFT FK1: %s RIGHT FK1: %s\n",fk1[0],fk1[1]);
   char *left2 = fk1[1]; //swp
   char *right2 = fk1[0]; //swp
-  printf("Left and right %s %s\n",left2,right2 );
   char **fk2 = FK(left2,right2,key2);
   char *left_final = fk2[0];
   char *right_final = fk2[1];
-  
   char *ciphertext = permute(inverIP,8,concat(left_final,right_final));
   return ciphertext;
+}
+char * decrypt (char* ciphertext, char *key){
+  char **keys_array = KeyGenerator(key);
+  char *key1 = keys_array[0];
+  char *key2 = keys_array[1];
+  char *permutated_cipher = permute(iP, 8, ciphertext);
+  char *left = split(permutated_cipher,true,8);
+  char *right = split(permutated_cipher,false,8);
+  char **fk1 = FK(left,right,key2);
+  //swap block
+  char *left2 = fk1[1]; //swp
+  char *right2 = fk1[0]; //swp
+  char **fk2 = FK(left2,right2,key1);
+  char *left_final = fk2[0];
+  char *right_final = fk2[1];
+  char *plaintext = permute(inverIP,8,concat(left_final,right_final));
+  return plaintext;
+
 }
 //MAIN
 int main(){
@@ -195,6 +207,7 @@ int main(){
     //char **keys_array = KeyGenerator("1100011110");
     //char **fk_test = FK("0010","0010","1100011110");
     printf("ciphertext :%s\n", encrypt("00101000", "1100011110"));
+    printf("plaintext :%s\n", decrypt("10001010","1100011110"));
     // printf("Right of FK :%s\n", fk_test[1]);
     //printf("KEY #1 is %s\n", keys_array[0]);
     //printf("KEY #2 is %s\n", keys_array[1]);
