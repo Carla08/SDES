@@ -10,6 +10,7 @@ int iP[] ={2 ,6 ,3 ,1 ,4 ,8 ,5 ,7};
 int inverIP[] ={4 ,1 ,3 ,5 ,7 ,2 ,8 ,6};
 int ep[] ={4 ,1 ,2 ,3 ,2 ,3 ,4 ,1};
 int p4[] = {2,4,3,1};
+char mode;
 
 char * pairs[245][2];
 char *s1[4][4]={{"01","00","10","11"},{"11","10","01","00"},{"00","10","01","11"},{"11","01","11","10"}};
@@ -208,7 +209,7 @@ char * decrypt (char* ciphertext, char *key){
 char * binToStr(int value)
 {
     int i;
-    char * output = malloc(10 * sizeof(char));
+    char * output = malloc(11 * sizeof(char));
     output[10] = '\0';
     for (i = 9; i >= 0; --i, value >>= 1)
     {
@@ -217,35 +218,51 @@ char * binToStr(int value)
     }
     return output;
 }
-char ** bruteforce (char *plaintext, char *ciphertext){
-  char *keys[20];
+
+char * bin8ToStr(int value)
+{
+    int i;
+    char * output = malloc(9 * sizeof(char));
+    output[8] = '\0';
+    for (i = 7; i >= 0; --i, value >>= 1)
+    {
+
+        output[i] = (value & 1) + '0';
+    }
+    return output;
+}
+void bruteForceKeyGenerator(char **plaintext, char **ciphertext){
+    char * keys[20];
     short i;
-  int c=0;
-  for (i=0; i<1024; i++){
-      char * key=malloc(sizeof(char)*10);
-    key = binToStr(i);
-      printf("%s\n",key);
-    char* encryption= encrypt(plaintext,key);
-    char* decryption = decrypt(ciphertext,key);
-    if(!strcmp(encryption,ciphertext) && !strcmp(decryption,plaintext)){
-        keys[c]=key;
-        printf("<----\n");
-        c++;
-    }
-      keys[c]='\0';
+    int c=0;
+    char * key=malloc(sizeof(char)*10);
+    for (i=0; i<1024; i++){
+        key = binToStr(i);
+        char* encryption= encrypt(plaintext[0],key);
+        char* decryption = decrypt(ciphertext[0],key);
+        if(!strcmp(encryption,ciphertext[0])){
+            int j;
+            for (j = 0; j < 245; j++) {
+                char* encryptionCheck= encrypt(plaintext[j],key);
+                char* decryptionCheck = decrypt(ciphertext[j],key);
 
-  }
-    char ** keysToReturn=malloc(c * sizeof(char*));
-    for (i=0; keys[i]!='\0';i++){
-        keysToReturn[i]=malloc(sizeof(char)*10);
-        keysToReturn[i]=keys[i];
-//        printf("Key is %s\n",keysToReturn[i]);
-    }
-    keysToReturn[i]='\0';
+                int v1=strcmp(encryptionCheck,ciphertext[j]);
+                int v2=strcmp(decryptionCheck,plaintext[j]);
+                if( v1 || v2 ){
+                    printf("No es\n");
+                    break;
+                }else if(j>100){
+                    printf("La llave es %s\n",key);
+                    return;
+                }
 
-  return keysToReturn;
+            }
+        }
+    }
+
 
 }
+
 
 char *** readPairs(char * filename, char ** plaintext,char ** ciphertext){
     FILE *fp;
@@ -289,60 +306,58 @@ char *** readPairs(char * filename, char ** plaintext,char ** ciphertext){
 
 
 
-int main(int argc, char *argv[]){
-    char **plaintext = malloc(sizeof(char*)*245);
-    char **ciphertext = malloc(sizeof(char*)*245);
-    char ***pairGroup =readPairs("C:\\Users\\mario\\Documents\\GitHub\\SDES\\pares.txt", plaintext, ciphertext);
+void newPares (){
+    FILE *fp = fopen("C:\\Users\\mario\\Documents\\GitHub\\SDES\\newpares.txt", "w+");
+    int i;
+    char * plaintext;
+    for (i = 0; i < 1000; ++i) {
+        plaintext =bin8ToStr(i);
+        fputs (concat(concat(concat(plaintext,","),encrypt(plaintext,"0000000001")),"\n"), fp );
+    }
+    fclose(fp);
+}
+
+void bruteForce(){
+    char **plaintext = malloc(sizeof(char*)*1000);
+    char **ciphertext = malloc(sizeof(char*)*1000);
+    char ***pairGroup =readPairs("C:\\Users\\mario\\Documents\\GitHub\\SDES\\newpares.txt", plaintext, ciphertext);
     plaintext=pairGroup[0];
     ciphertext=pairGroup[1];
-    int i;
     printf("Searching keys\n");
-    char **keys = bruteforce(plaintext[0],ciphertext[0]);
+    bruteForceKeyGenerator(plaintext,ciphertext);
+}
+int main(int argc, char *argv[]){
+//    newPares();
+    printf("Para hacer encrypt presione 1, decrypt 2 y bruteforce 3\n");
+    mode = getchar();
+    if(mode=='1'){
+        printf("Encryp mode\n");
+        char  * plaintext=malloc(sizeof(char)*9);
+        char * key=malloc(sizeof(char)*11);
+        printf("Type plaintext\n");
+        scanf("%s",plaintext);
 
-    for ( i = 0; keys[i]!='\0'; i++) {
-//        printf("Key again %s",keys[i]);
-        int j;
-        for (j = 0; j < 245; j++) {
-            char* encryption= encrypt(plaintext[j],keys[i]);
-            char* decryption = decrypt(ciphertext[j],keys[i]);
-//            printf("J is %d",j);
-//            printf("Plaintext and Decrypt is-> %s    %s\n",plaintext[j],decryption);
-//            printf("Ciphertext and Encryption is-> %s    %s\n",ciphertext[j],encryption);
-            int v1=strcmp(encryption,ciphertext[j]);
-            int v2=strcmp(decryption,plaintext[j]);
-            if( v1  ){
-//                printf("The TRUE key is %s\n",keys[i]);
+        printf("Type key\n");
+        scanf("%s",key);
+        plaintext[8]='\0';
+        key[10]='\0';
+        printf("The encrypted Text is %s\n",encrypt(plaintext,key));
+    }else if (mode == '2'){
+        printf("Decrypt mode\n");
+        char * ciphertext=malloc(sizeof(char)*9);
+        char * key=malloc(sizeof(char)*11);
+        printf("Type ciphertext\n");
+        scanf("%s",ciphertext);
 
-               break;
-            }
-            if(j>50){
-                printf("Key again %s",keys[i]);
-                return 0;
-            }
-        }
+        printf("Type key\n");
+        scanf("%s",key);
+        ciphertext[8]='\0';
+        key[10]='\0';
+        printf("The decrypted text is %s",decrypt(ciphertext,key));
+    }else{
+        printf("Starting brute force");
+        printf("Reading from %s","C:\\Users\\mario\\Documents\\GitHub\\SDES\\newpares.txt");
+        bruteForce();
     }
-//    key[i++]="\0";
-//    printf("Search finished\n");
-//
-//    printf("Validating keys\n");
-//    for (i = 0; i <strlen(keys)0; i++) {
-//        if (!strcmp(keys[i],"")){
-//            ;
-//        }
-//        int j;
-//        for ( j = 0; j < 490  ; j++) {
-//            printf("The j value is %d\n",j);
-//            char* encryption= encrypt(plaintext[j],keys[i]);
-//            char* decryption = decrypt(ciphertext[j],keys[i]);
-//            if(strcmp(encryption,ciphertext[j]) || strcmp(decryption,plaintext[j])){
-////                printf("The TRUE key is %s\n",keys[i]);
-//               break;;
-//            }
-//            if (j>10){
-//                printf("The TRUE key is %s\n",keys[i]);
-//                return 0;
-//            }
-//        }
-//    }
     return 0;
 }
