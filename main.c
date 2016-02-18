@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -10,7 +11,7 @@ int iP[] ={2 ,6 ,3 ,1 ,4 ,8 ,5 ,7};
 int inverIP[] ={4 ,1 ,3 ,5 ,7 ,2 ,8 ,6};
 int ep[] ={4 ,1 ,2 ,3 ,2 ,3 ,4 ,1};
 int p4[] = {2,4,3,1};
-char *s1[4][4]={{"01","00","11","10"},{"11","10","01","00"},{"00","10","01","11"},{"11","01","11","10"}};
+char *s1[4][4]={{"01","00","10","11"},{"11","10","01","00"},{"00","10","01","11"},{"11","01","11","10"}};
 char *s2[4][4]={{"00","01","10","11"},{"10","00","01","11"},{"11","00","01","00"},{"10","01","00","11"}};
 
 //STRING CONCAT
@@ -64,13 +65,18 @@ char * permute(int p[],int plength, char * text){
 }
 
 int  bitToDecimal(char * bit){
-  if (strcmp(bit,"01") || strcmp(bit,"10")) {
-    return 1;
-  } else  {
+  if (strcmp(bit,"00")) {
     return 0;
+  } else if (strcmp(bit,"01"))
+  {
+    return 1;
+  }else if (strcmp(bit,"10"))
+  {
+    return 2;
+  }else {
+    return 3;
   }
 }
-
 
 int * bitToCoordinates (char * string){
   int * coordinates= malloc(sizeof(int)*2);
@@ -84,8 +90,9 @@ int * bitToCoordinates (char * string){
   yString[2] ='\0';
   int x = bitToDecimal(xString);
   int y = bitToDecimal(yString);
+  printf("Coordinates: x,y %d,%d\n", x,y);
   coordinates[0] =x;
-  coordinates[1]=y;
+  coordinates[1] =y;
   return coordinates;
 }
 
@@ -106,6 +113,7 @@ char * xor (char* string1, char* string2){
         stringXOR[i]= '0';
     }
   }
+  printf("XORed String: %s\n", stringXOR);
   return stringXOR;
 }
 
@@ -131,13 +139,15 @@ char** KeyGenerator (char* key){
 
 //FK MASTER FUNCTION /*WARNING: needs testing*/
 char** FK(char* left,char* right, char* key){
+  printf("LEFT: %s, RIGHT: %s, KEY: %s \n", left,right,key);
   char *EP = permute(ep,8,right);
   char *EPxorKey = xor(EP,key);
-  // printf("EPxorKey%s\n", EPxorKey);
+  printf("EPxorKey%s\n", EPxorKey);
   char *left_half = split(EPxorKey,true,8);
   char *right_half = split(EPxorKey,false,8);
   char *sLeft = sBox(s1, left_half);
   char *sRight =  sBox(s2,right_half);
+  printf("SBOX left: %s right %s\n", sLeft,sRight);
   char *sJoin = concat(sLeft,sRight);
   char *per4 = permute(p4,4,sJoin);
   char *leftxorPer4 = xor(left, per4);
@@ -166,7 +176,7 @@ char * encrypt (char* plaintext, char * key){
   printf("KEY1: %s\n KEY2: %s\n",keys_array[0],keys_array[1]);
   char **fk1 = FK(left,right,key1);
   //swap block
-  printf("BEFORE SWAP: LEFT FK1: %s\n LEFT FK1: %s\n",fk1[0],fk1[1]);
+  printf("BEFORE SWAP: LEFT FK1: %s RIGHT FK1: %s\n",fk1[0],fk1[1]);
   char *left2 = fk1[1]; //swp
   char *right2 = fk1[0]; //swp
   printf("Left and right %s %s\n",left2,right2 );
