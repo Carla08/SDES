@@ -232,10 +232,13 @@ void readPairs(char * filename, char ** plaintext,char ** ciphertext){
 
 }
 //MAIN
+
+
+
 int main(int argc, char *argv[]){
-    char **plaintext = malloc(sizeof(char*)*245);
-    char **ciphertext = malloc(sizeof(char*)*245);
-    readPairs("C:\\Users\\mario\\Documents\\GitHub\\SDES\\pares.txt", plaintext, ciphertext);
+//    char **plaintext = malloc(sizeof(char*)*245);
+//    char **ciphertext = malloc(sizeof(char*)*245);
+//    readPairs("C:\\Users\\mario\\Documents\\GitHub\\SDES\\pares.txt", plaintext, ciphertext);
 
     // printf("The shiftedTex -> %s \n",leftShift("10000",2));
     //printf("The permutated text -> %s\n",permute(p10, 10, key));
