@@ -2,7 +2,6 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
 char key[] ="1100011110";
 int p10[10] = {3,5,2,7,4,10,1,9,8,6};
 int p8[] = {6,3,7,4,8,5,10,9};
@@ -173,7 +172,7 @@ char * encrypt (char* plaintext, char * key){
   char **fk2 = FK(left2,right2,key2);
   char *left_final = fk2[0];
   char *right_final = fk2[1];
-  
+
   char *ciphertext = permute(inverIP,8,concat(left_final,right_final));
   return ciphertext;
 }
