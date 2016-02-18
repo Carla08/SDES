@@ -169,7 +169,6 @@ char** FK(char* left,char* right, char* key){
 }
 //ENCRYPT MASTER
 char * encrypt (char* plaintext, char * key){
-  //printf("PLAINTEXT: %s\n",plaintext );
   char *permutated_plain = permute(iP, 8, plaintext);
   char **keys_array = KeyGenerator(key);
   char *left = split(permutated_plain,true,8);
@@ -184,6 +183,18 @@ char * encrypt (char* plaintext, char * key){
   char *left_final = fk2[0];
   char *right_final = fk2[1];
   char *ciphertext = permute(inverIP,8,concat(left_final,right_final));
+    printf("IP    %s\n",permutated_plain );
+    printf("Left side    %s\n", left);
+    printf("Right side    %s\n", right);
+    printf("Key 1     %s\n",key1 );
+    printf("Key 2   %s\n", key2);
+    printf("Left side    %s\n", left);
+    printf("Right side    %s\n", right);
+    printf("Shifted left    %s\n", left2);
+    printf("Shifted right    %s\n", right2);
+    printf("Shifted right    %s\n", right2);
+    printf("Ciphertext    %s\n", ciphertext);
+
 //    free(left);free(right);free(left2);free(right2);free(permutated_plain);free(keys_array);free(key1);free(key2);free(fk1);free(fk2);
   return ciphertext;
 }
@@ -202,6 +213,17 @@ char * decrypt (char* ciphertext, char *key){
   char *left_final = fk2[0];
   char *right_final = fk2[1];
   char *plaintext = permute(inverIP,8,concat(left_final,right_final));
+    printf("IP    %s\n",permutated_cipher );
+    printf("Left side    %s\n", left);
+    printf("Right side    %s\n", right);
+    printf("Key 1     %s\n",key1 );
+    printf("Key 2   %s\n", key2);
+    printf("Left side    %s\n", left);
+    printf("Right side    %s\n", right);
+    printf("Shifted left    %s\n", left2);
+    printf("Shifted right    %s\n", right2);
+    printf("Shifted right    %s\n", right2);
+    printf("Plaintext   %s\n", ciphertext);
 
 //    free(left);free(right);free(left2);free(right2);free(permutated_cipher);free(keys_array);free(key1);free(key2);free(fk1);free(fk2);
   return plaintext;
@@ -348,7 +370,6 @@ int main(int argc, char *argv[]){
         char * key=malloc(sizeof(char)*11);
         printf("Type ciphertext\n");
         scanf("%s",ciphertext);
-
         printf("Type key\n");
         scanf("%s",key);
         ciphertext[8]='\0';
