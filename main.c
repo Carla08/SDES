@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-char key[] ="1100011110";
+char key[] ="0000000000\0";
 int p10[10] = {3,5,2,7,4,10,1,9,8,6};
 int p8[] = {6,3,7,4,8,5,10,9};
 int iP[] ={2 ,6 ,3 ,1 ,4 ,8 ,5 ,7};
@@ -81,21 +81,22 @@ int  bitToDecimal(char * bit){
 }
 
 int * bitToCoordinates (char * string){
-    int * coordinates= malloc(sizeof(int)*2);
-    char * xString =malloc(sizeof(char)*3);
-    char * yString= malloc(sizeof(char)*3);
-    xString[0] =string[0];
-    xString[1] =string[3];
-    xString[2] ='\0';
-    yString[0] = string[1];
-    yString[1] = string[2];
-    yString[2] ='\0';
-    int x = bitToDecimal(xString);
-    int y = bitToDecimal(yString);
-    printf("Coordinates: x,y %d,%d\n", x,y);
-    coordinates[0] =x;
-    coordinates[1] =y;
-    return coordinates;
+  int * coordinates= malloc(sizeof(int)*2);
+  char * xString =malloc(sizeof(char)*3);
+  char * yString= malloc(sizeof(char)*3);
+  xString[0] =string[0];
+  xString[1] =string[3];
+  xString[2] ='\0';
+  yString[0] = string[1];
+  yString[1] = string[2];
+  yString[2] ='\0';
+
+  int x = bitToDecimal(xString);
+  int y = bitToDecimal(yString);
+  //printf("Coordinates: x,y %d,%d\n", x,y);
+  coordinates[0] =x;
+  coordinates[1] =y;
+  return coordinates;
 }
 
 char *  sBox(char * box[4][4], char * half){
@@ -115,7 +116,7 @@ char * xor (char* string1, char* string2){
             stringXOR[i]= '0';
         }
     }
-    printf("XORed String: %s\n", stringXOR);
+    //printf("XORed String: %s\n", stringXOR);
     return stringXOR;
 }
 
@@ -141,19 +142,15 @@ char** KeyGenerator (char* key){
 
 //FK MASTER FUNCTION /*WARNING: needs testing*/
 char** FK(char* left,char* right, char* key){
-    printf("LEFT: %s, RIGHT: %s, KEY: %s \n", left,right,key);
     char *EP = permute(ep,8,right);
     char *EPxorKey = xor(EP,key);
-    printf("EPxorKey%s\n", EPxorKey);
     char *left_half = split(EPxorKey,true,8);
     char *right_half = split(EPxorKey,false,8);
     char *sLeft = sBox(s1, left_half);
     char *sRight =  sBox(s2,right_half);
-    printf("SBOX left: %s right %s\n", sLeft,sRight);
     char *sJoin = concat(sLeft,sRight);
     char *per4 = permute(p4,4,sJoin);
     char *leftxorPer4 = xor(left, per4);
-    printf("leftxorPer4 :%s     left:%s    per4:%s \n ",leftxorPer4,left,per4);
     char **leftright_array = malloc(2 * sizeof(char*));
     short i;
     for (i = 0; i<2; i++){
@@ -166,28 +163,67 @@ char** FK(char* left,char* right, char* key){
 }
 //ENCRYPT MASTER
 char * encrypt (char* plaintext, char * key){
-    char *permutated_plain = permute(iP, 8, plaintext);
-    printf("PERMUTATED PLAIN: %s\n",permutated_plain);
-    char **keys_array = KeyGenerator(key);
-    char *left = split(permutated_plain,true,8);
-    printf("LEFT OF PERMUTATED PLAIN: %s\n", left);
-    char *right = split(permutated_plain,false,8);
-    printf("RIGHT OF PERMUTATED PLAIN: %s\n", right);
-    char *key1 = keys_array[0];
-    char *key2 = keys_array[1];
-    printf("KEY1: %s\n KEY2: %s\n",keys_array[0],keys_array[1]);
-    char **fk1 = FK(left,right,key1);
-    //swap block
-    printf("BEFORE SWAP: LEFT FK1: %s RIGHT FK1: %s\n",fk1[0],fk1[1]);
-    char *left2 = fk1[1]; //swp
-    char *right2 = fk1[0]; //swp
-    printf("Left and right %s %s\n",left2,right2 );
-    char **fk2 = FK(left2,right2,key2);
-    char *left_final = fk2[0];
-    char *right_final = fk2[1];
-
-    char *ciphertext = permute(inverIP,8,concat(left_final,right_final));
-    return ciphertext;
+  //printf("PLAINTEXT: %s\n",plaintext );
+  char *permutated_plain = permute(iP, 8, plaintext);
+  char **keys_array = KeyGenerator(key);
+  char *left = split(permutated_plain,true,8);
+  char *right = split(permutated_plain,false,8);
+  char *key1 = keys_array[0];
+  char *key2 = keys_array[1];
+  char **fk1 = FK(left,right,key1);
+  //swap block
+  char *left2 = fk1[1]; //swp
+  char *right2 = fk1[0]; //swp
+  char **fk2 = FK(left2,right2,key2);
+  char *left_final = fk2[0];
+  char *right_final = fk2[1];
+  char *ciphertext = permute(inverIP,8,concat(left_final,right_final));
+  return ciphertext;
+}
+char * decrypt (char* ciphertext, char *key){
+  char **keys_array = KeyGenerator(key);
+  char *key1 = keys_array[0];
+  char *key2 = keys_array[1];
+  char *permutated_cipher = permute(iP, 8, ciphertext);
+  char *left = split(permutated_cipher,true,8);
+  char *right = split(permutated_cipher,false,8);
+  char **fk1 = FK(left,right,key2);
+  //swap block
+  char *left2 = fk1[1]; //swp
+  char *right2 = fk1[0]; //swp
+  char **fk2 = FK(left2,right2,key1);
+  char *left_final = fk2[0];
+  char *right_final = fk2[1];
+  char *plaintext = permute(inverIP,8,concat(left_final,right_final));
+  return plaintext;
+}
+char * binToStr(int value)
+{
+    int i;
+    char * output = malloc(10 * sizeof(char));
+    output[10] = '\0';
+    for (i = 9; i >= 0; --i, value >>= 1)
+    {
+        output[i] = (value & 1) + '0';
+    }
+    return output;
+}
+char * bruteforce (char *plaintext, char *ciphertext){
+  short i;
+  int c;
+  for (i=0; i<1023; i++){
+    char *key = binToStr(i);
+    printf("POSSIBLE KEY: %s\n", key);
+    char* encryption= encrypt(plaintext,key);
+    char* decryption = decrypt(ciphertext,key);
+    if(!strcmp(encryption,ciphertext)&& !strcmp(decryption,plaintext)){
+      c++;
+      printf("encryption: %s, decryption: %s, key: %s \n",encryption,decryption,key);
+      //return key;
+    }
+  }
+  printf("C:%d\n", c);
+  return "no key found";
 }
 
 void readPairs(char * filename, char ** plaintext,char ** ciphertext){
@@ -243,12 +279,16 @@ int main(int argc, char *argv[]){
     // printf("The shiftedTex -> %s \n",leftShift("10000",2));
     //printf("The permutated text -> %s\n",permute(p10, 10, key));
     //printf("Half array is %s\n",split("1100",false,4));
-    //char **keys_array = KeyGenerator("1100011110");
+    //char **keys_array = KeyGenerator("0000000001");
     //char **fk_test = FK("0010","0010","1100011110");
+<<<<<<< HEAD
+    printf("ciphertext :%s\n", encrypt("00101000", "0111101011"));
+    //printf("plaintext :%s\n", decrypt("10001010","1100011110"));
+    printf("Key found: %s\n", bruteforce("00101000","10001010"));
+=======
     //printf("ciphertext :%s\n", encrypt("00101000", "1100011110"));
+>>>>>>> 2ee610a355df085b9c5e1f92140c2bc23542f71e
     // printf("Right of FK :%s\n", fk_test[1]);
-    //printf("KEY #1 is %s\n", keys_array[0]);
-    //printf("KEY #2 is %s\n", keys_array[1]);
     //xor("1100", "0011");
     return 0;
 }
