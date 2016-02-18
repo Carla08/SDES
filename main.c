@@ -107,7 +107,7 @@ char *  sBox(char * box[4][4], char * half){
 //XOR
 char * xor (char* string1, char* string2){
     short string_lenght = strlen(string1);
-    char * stringXOR = malloc(string_lenght * sizeof(char));
+    char * stringXOR = malloc(string_lenght+1 * sizeof(char));
     short i;
     for (i=0; i<string_lenght; i++){
         if (string1[i] != string2[i]) {
@@ -116,6 +116,7 @@ char * xor (char* string1, char* string2){
             stringXOR[i]= '0';
         }
     }
+    stringXOR[i]='\0';
     //printf("XORed String: %s\n", stringXOR);
     return stringXOR;
 }
@@ -137,6 +138,9 @@ char** KeyGenerator (char* key){
     }
     keys_array[0] = key1;
     keys_array[1] = key2;
+    //FREE KEYGENERATOR
+//    free(permutated_key);
+//    free(left);free(right);free(shift_one_left);free(shift_two_right);free(shift_two_left);free(shift_two_right);free(key1);free(key2);
     return keys_array;
 }
 
@@ -159,6 +163,7 @@ char** FK(char* left,char* right, char* key){
     // printf("leftxorPer4 : %s\n", leftxorPer4);
     leftright_array[0] = leftxorPer4;
     leftright_array[1] = right;
+//    free(EP);free(EPxorKey);free(left_half);free(right_half);free(sLeft);free(sRight);free(sJoin);free(per4);free(leftxorPer4);free(right);
     return leftright_array;
 }
 //ENCRYPT MASTER
@@ -178,6 +183,7 @@ char * encrypt (char* plaintext, char * key){
   char *left_final = fk2[0];
   char *right_final = fk2[1];
   char *ciphertext = permute(inverIP,8,concat(left_final,right_final));
+//    free(left);free(right);free(left2);free(right2);free(permutated_plain);free(keys_array);free(key1);free(key2);free(fk1);free(fk2);
   return ciphertext;
 }
 char * decrypt (char* ciphertext, char *key){
@@ -195,6 +201,8 @@ char * decrypt (char* ciphertext, char *key){
   char *left_final = fk2[0];
   char *right_final = fk2[1];
   char *plaintext = permute(inverIP,8,concat(left_final,right_final));
+
+//    free(left);free(right);free(left2);free(right2);free(permutated_cipher);free(keys_array);free(key1);free(key2);free(fk1);free(fk2);
   return plaintext;
 }
 char * binToStr(int value)
@@ -204,29 +212,42 @@ char * binToStr(int value)
     output[10] = '\0';
     for (i = 9; i >= 0; --i, value >>= 1)
     {
+
         output[i] = (value & 1) + '0';
     }
     return output;
 }
-char * bruteforce (char *plaintext, char *ciphertext){
-  short i;
-  int c;
-  for (i=0; i<1023; i++){
-    char *key = binToStr(i);
-    printf("POSSIBLE KEY: %s\n", key);
+char ** bruteforce (char *plaintext, char *ciphertext){
+  char *keys[20];
+    short i;
+  int c=0;
+  for (i=0; i<1024; i++){
+      char * key=malloc(sizeof(char)*10);
+    key = binToStr(i);
+      printf("%s\n",key);
     char* encryption= encrypt(plaintext,key);
     char* decryption = decrypt(ciphertext,key);
-    if(!strcmp(encryption,ciphertext)&& !strcmp(decryption,plaintext)){
-      c++;
-      printf("encryption: %s, decryption: %s, key: %s \n",encryption,decryption,key);
-      //return key;
+    if(!strcmp(encryption,ciphertext) && !strcmp(decryption,plaintext)){
+        keys[c]=key;
+        printf("<----\n");
+        c++;
     }
+      keys[c]='\0';
+
   }
-  printf("C:%d\n", c);
-  return "no key found";
+    char ** keysToReturn=malloc(c * sizeof(char*));
+    for (i=0; keys[i]!='\0';i++){
+        keysToReturn[i]=malloc(sizeof(char)*10);
+        keysToReturn[i]=keys[i];
+//        printf("Key is %s\n",keysToReturn[i]);
+    }
+    keysToReturn[i]='\0';
+
+  return keysToReturn;
+
 }
 
-void readPairs(char * filename, char ** plaintext,char ** ciphertext){
+char *** readPairs(char * filename, char ** plaintext,char ** ciphertext){
     FILE *fp;
     char ch;
     fp = fopen(filename,"r"); // read mode
@@ -235,12 +256,13 @@ void readPairs(char * filename, char ** plaintext,char ** ciphertext){
         exit(EXIT_FAILURE);
     }
 
+    char *** pairsGroup=malloc(sizeof(char**)*2);
     short lineNumber=0;
     short column;
     char * string=malloc(sizeof(char)*9);
     char line[19];
     while (fgets(line, sizeof(line), fp) ) {
-        char * actualLine= strtok(line,",\0");
+        char * actualLine= strtok(line,",");
 
         for (column = 0; column < 2 && actualLine != NULL ; column++) {
             if(actualLine[8]=='\n'){
@@ -248,47 +270,79 @@ void readPairs(char * filename, char ** plaintext,char ** ciphertext){
             }
             if (column==0){
                 plaintext[lineNumber]=malloc(sizeof(char)*9);
-                plaintext[lineNumber]=actualLine;
+                strcpy(plaintext[lineNumber],actualLine);
             }else if (column ==1){
                 ciphertext[lineNumber]=malloc(sizeof(char)*9);
-                ciphertext[lineNumber]=actualLine;
+                strcpy(ciphertext[lineNumber],actualLine);
             }
-
-
-            actualLine=strtok(NULL, ",");
+            actualLine=strtok(NULL, ",\0");
         }
-        printf("Actual Line %d %s  %s\n",lineNumber,plaintext[lineNumber], ciphertext[lineNumber]);
         lineNumber++;
 
     }
-
-
-
+    pairsGroup[0]=plaintext;
+    pairsGroup[1]=ciphertext;
     fclose(fp);
-
+    return pairsGroup;
 }
 //MAIN
 
 
 
 int main(int argc, char *argv[]){
-//    char **plaintext = malloc(sizeof(char*)*245);
-//    char **ciphertext = malloc(sizeof(char*)*245);
-//    readPairs("C:\\Users\\mario\\Documents\\GitHub\\SDES\\pares.txt", plaintext, ciphertext);
+    char **plaintext = malloc(sizeof(char*)*245);
+    char **ciphertext = malloc(sizeof(char*)*245);
+    char ***pairGroup =readPairs("C:\\Users\\mario\\Documents\\GitHub\\SDES\\pares.txt", plaintext, ciphertext);
+    plaintext=pairGroup[0];
+    ciphertext=pairGroup[1];
+    int i;
+    printf("Searching keys\n");
+    char **keys = bruteforce(plaintext[0],ciphertext[0]);
 
-    // printf("The shiftedTex -> %s \n",leftShift("10000",2));
-    //printf("The permutated text -> %s\n",permute(p10, 10, key));
-    //printf("Half array is %s\n",split("1100",false,4));
-    //char **keys_array = KeyGenerator("0000000001");
-    //char **fk_test = FK("0010","0010","1100011110");
-<<<<<<< HEAD
-    printf("ciphertext :%s\n", encrypt("00101000", "0111101011"));
-    //printf("plaintext :%s\n", decrypt("10001010","1100011110"));
-    printf("Key found: %s\n", bruteforce("00101000","10001010"));
-=======
-    //printf("ciphertext :%s\n", encrypt("00101000", "1100011110"));
->>>>>>> 2ee610a355df085b9c5e1f92140c2bc23542f71e
-    // printf("Right of FK :%s\n", fk_test[1]);
-    //xor("1100", "0011");
+    for ( i = 0; keys[i]!='\0'; i++) {
+//        printf("Key again %s",keys[i]);
+        int j;
+        for (j = 0; j < 245; j++) {
+            char* encryption= encrypt(plaintext[j],keys[i]);
+            char* decryption = decrypt(ciphertext[j],keys[i]);
+//            printf("J is %d",j);
+//            printf("Plaintext and Decrypt is-> %s    %s\n",plaintext[j],decryption);
+//            printf("Ciphertext and Encryption is-> %s    %s\n",ciphertext[j],encryption);
+            int v1=strcmp(encryption,ciphertext[j]);
+            int v2=strcmp(decryption,plaintext[j]);
+            if( v1  ){
+//                printf("The TRUE key is %s\n",keys[i]);
+
+               break;
+            }
+            if(j>50){
+                printf("Key again %s",keys[i]);
+                return 0;
+            }
+        }
+    }
+//    key[i++]="\0";
+//    printf("Search finished\n");
+//
+//    printf("Validating keys\n");
+//    for (i = 0; i <strlen(keys)0; i++) {
+//        if (!strcmp(keys[i],"")){
+//            ;
+//        }
+//        int j;
+//        for ( j = 0; j < 490  ; j++) {
+//            printf("The j value is %d\n",j);
+//            char* encryption= encrypt(plaintext[j],keys[i]);
+//            char* decryption = decrypt(ciphertext[j],keys[i]);
+//            if(strcmp(encryption,ciphertext[j]) || strcmp(decryption,plaintext[j])){
+////                printf("The TRUE key is %s\n",keys[i]);
+//               break;;
+//            }
+//            if (j>10){
+//                printf("The TRUE key is %s\n",keys[i]);
+//                return 0;
+//            }
+//        }
+//    }
     return 0;
 }
