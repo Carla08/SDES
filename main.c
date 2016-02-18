@@ -10,6 +10,8 @@ int iP[] ={2 ,6 ,3 ,1 ,4 ,8 ,5 ,7};
 int inverIP[] ={4 ,1 ,3 ,5 ,7 ,2 ,8 ,6};
 int ep[] ={4 ,1 ,2 ,3 ,2 ,3 ,4 ,1};
 int p4[] = {2,4,3,1};
+
+char * pairs[245][2];
 char *s1[4][4]={{"01","00","10","11"},{"11","10","01","00"},{"00","10","01","11"},{"11","01","11","10"}};
 char *s2[4][4]={{"00","01","10","11"},{"10","00","01","11"},{"11","00","01","00"},{"10","01","00","11"}};
 
@@ -187,14 +189,60 @@ char * encrypt (char* plaintext, char * key){
     char *ciphertext = permute(inverIP,8,concat(left_final,right_final));
     return ciphertext;
 }
+
+void readPairs(char * filename, char ** plaintext,char ** ciphertext){
+    FILE *fp;
+    char ch;
+    fp = fopen(filename,"r"); // read mode
+    if( fp == NULL ){
+        perror("Error while opening the file.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    short lineNumber=0;
+    short column;
+    char * string=malloc(sizeof(char)*9);
+    char line[19];
+    while (fgets(line, sizeof(line), fp) ) {
+        char * actualLine= strtok(line,",\0");
+
+        for (column = 0; column < 2 && actualLine != NULL ; column++) {
+            if(actualLine[8]=='\n'){
+                actualLine[8]=(char)'\0';
+            }
+            if (column==0){
+                plaintext[lineNumber]=malloc(sizeof(char)*9);
+                plaintext[lineNumber]=actualLine;
+            }else if (column ==1){
+                ciphertext[lineNumber]=malloc(sizeof(char)*9);
+                ciphertext[lineNumber]=actualLine;
+            }
+
+
+            actualLine=strtok(NULL, ",");
+        }
+        printf("Actual Line %d %s  %s\n",lineNumber,plaintext[lineNumber], ciphertext[lineNumber]);
+        lineNumber++;
+
+    }
+
+
+
+    fclose(fp);
+
+}
 //MAIN
-int main(){
+int main(int argc, char *argv[]){
+    char **plaintext = malloc(sizeof(char*)*245);
+    char **ciphertext = malloc(sizeof(char*)*245);
+    readPairs("C:\\Users\\mario\\Documents\\GitHub\\SDES\\pares.txt", plaintext, ciphertext);
+
     // printf("The shiftedTex -> %s \n",leftShift("10000",2));
     //printf("The permutated text -> %s\n",permute(p10, 10, key));
     //printf("Half array is %s\n",split("1100",false,4));
     //char **keys_array = KeyGenerator("1100011110");
     //char **fk_test = FK("0010","0010","1100011110");
-    printf("ciphertext :%s\n", encrypt("00101000", "1100011110"));
+    //printf("ciphertext :%s\n", encrypt("00101000", "1100011110"));
     // printf("Right of FK :%s\n", fk_test[1]);
     //printf("KEY #1 is %s\n", keys_array[0]);
     //printf("KEY #2 is %s\n", keys_array[1]);
