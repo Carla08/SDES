@@ -10,10 +10,10 @@ int iP[] ={2 ,6 ,3 ,1 ,4 ,8 ,5 ,7};
 int inverIP[] ={4 ,1 ,3 ,5 ,7 ,2 ,8 ,6};
 int ep[] ={4 ,1 ,2 ,3 ,2 ,3 ,4 ,1};
 int p4[] = {2,4,3,1};
-char mode;
+char mode='0';
 
 char * pairs[245][2];
-char *s1[4][4]={{"01","00","10","11"},{"11","10","01","00"},{"00","10","01","11"},{"11","01","11","10"}};
+char *s1[4][4]={{"01","00","11","10"},{"11","10","01","00"},{"00","10","01","11"},{"11","01","11","10"}};
 char *s2[4][4]={{"00","01","10","11"},{"10","00","01","11"},{"11","00","01","00"},{"10","01","00","11"}};
 
 //STRING CONCAT
@@ -135,7 +135,7 @@ char** KeyGenerator (char* key){
     char **keys_array = malloc(2 * sizeof(char*));
     short i;
     for (i = 0; i<2; i++){
-        keys_array[i] = malloc(8*sizeof(char));
+        keys_array[i] = malloc(9*sizeof(char));
     }
     keys_array[0] = key1;
     keys_array[1] = key2;
@@ -183,17 +183,17 @@ char * encrypt (char* plaintext, char * key){
   char *left_final = fk2[0];
   char *right_final = fk2[1];
   char *ciphertext = permute(inverIP,8,concat(left_final,right_final));
-    printf("IP    %s\n",permutated_plain );
-    printf("Left side    %s\n", left);
-    printf("Right side    %s\n", right);
-    printf("Key 1     %s\n",key1 );
-    printf("Key 2   %s\n", key2);
-    printf("Left side    %s\n", left);
-    printf("Right side    %s\n", right);
-    printf("Shifted left    %s\n", left2);
-    printf("Shifted right    %s\n", right2);
-    printf("Shifted right    %s\n", right2);
-    printf("Ciphertext    %s\n", ciphertext);
+//    printf("IP    %s\n",permutated_plain );
+//    printf("Left side    %s\n", left);
+//    printf("Right side    %s\n", right);
+//    printf("Key 1     %s\n",key1 );
+//    printf("Key 2   %s\n", key2);
+//    printf("Left side    %s\n", left);
+//    printf("Right side    %s\n", right);
+//    printf("Shifted left    %s\n", left2);
+//    printf("Shifted right    %s\n", right2);
+//    printf("Shifted right    %s\n", right2);
+//    printf("Ciphertext    %s\n", ciphertext);
 
 //    free(left);free(right);free(left2);free(right2);free(permutated_plain);free(keys_array);free(key1);free(key2);free(fk1);free(fk2);
   return ciphertext;
@@ -213,17 +213,17 @@ char * decrypt (char* ciphertext, char *key){
   char *left_final = fk2[0];
   char *right_final = fk2[1];
   char *plaintext = permute(inverIP,8,concat(left_final,right_final));
-    printf("IP    %s\n",permutated_cipher );
-    printf("Left side    %s\n", left);
-    printf("Right side    %s\n", right);
-    printf("Key 1     %s\n",key1 );
-    printf("Key 2   %s\n", key2);
-    printf("Left side    %s\n", left);
-    printf("Right side    %s\n", right);
-    printf("Shifted left    %s\n", left2);
-    printf("Shifted right    %s\n", right2);
-    printf("Shifted right    %s\n", right2);
-    printf("Plaintext   %s\n", ciphertext);
+//    printf("IP    %s\n",permutated_cipher );
+//    printf("Left side    %s\n", left);
+//    printf("Right side    %s\n", right);
+//    printf("Key 1     %s\n",key1 );
+//    printf("Key 2   %s\n", key2);
+//    printf("Left side    %s\n", left);
+//    printf("Right side    %s\n", right);
+//    printf("Shifted left    %s\n", left2);
+//    printf("Shifted right    %s\n", right2);
+//    printf("Shifted right    %s\n", right2);
+//    printf("Plaintext   %s\n", ciphertext);
 
 //    free(left);free(right);free(left2);free(right2);free(permutated_cipher);free(keys_array);free(key1);free(key2);free(fk1);free(fk2);
   return plaintext;
@@ -334,7 +334,7 @@ void newPares (){
     char * plaintext;
     for (i = 0; i < 1000; ++i) {
         plaintext =bin8ToStr(i);
-        fputs (concat(concat(concat(plaintext,","),encrypt(plaintext,"0000000001")),"\n"), fp );
+        fputs (concat(concat(concat(plaintext,","),encrypt(plaintext,"1001100110")),"\n"), fp );
     }
     fclose(fp);
 }
@@ -342,43 +342,45 @@ void newPares (){
 void bruteForce(){
     char **plaintext = malloc(sizeof(char*)*1000);
     char **ciphertext = malloc(sizeof(char*)*1000);
-    char ***pairGroup =readPairs("C:\\Users\\mario\\Documents\\GitHub\\SDES\\newpares.txt", plaintext, ciphertext);
+    char ***pairGroup =readPairs("C:\\Users\\mario\\Documents\\GitHub\\SDES\\pares.txt", plaintext, ciphertext);
     plaintext=pairGroup[0];
     ciphertext=pairGroup[1];
     printf("Searching keys\n");
     bruteForceKeyGenerator(plaintext,ciphertext);
 }
 int main(int argc, char *argv[]){
+    bruteForce();
+//    printf(decrypt("01100000","1001100110"));
 //    newPares();
-    printf("Para hacer encrypt presione 1, decrypt 2 y bruteforce 3\n");
-    mode = getchar();
-    if(mode=='1'){
-        printf("Encryp mode\n");
-        char  * plaintext=malloc(sizeof(char)*9);
-        char * key=malloc(sizeof(char)*11);
-        printf("Type plaintext\n");
-        scanf("%s",plaintext);
-
-        printf("Type key\n");
-        scanf("%s",key);
-        plaintext[8]='\0';
-        key[10]='\0';
-        printf("The encrypted Text is %s\n",encrypt(plaintext,key));
-    }else if (mode == '2'){
-        printf("Decrypt mode\n");
-        char * ciphertext=malloc(sizeof(char)*9);
-        char * key=malloc(sizeof(char)*11);
-        printf("Type ciphertext\n");
-        scanf("%s",ciphertext);
-        printf("Type key\n");
-        scanf("%s",key);
-        ciphertext[8]='\0';
-        key[10]='\0';
-        printf("The decrypted text is %s",decrypt(ciphertext,key));
-    }else{
-        printf("Starting brute force");
-        printf("Reading from %s","C:\\Users\\mario\\Documents\\GitHub\\SDES\\newpares.txt");
-        bruteForce();
-    }
+//    printf("Para hacer encrypt presione 1, decrypt 2 y bruteforce 3\n");
+//    mode = getchar();
+//    if(mode=='1'){
+//        printf("Encryp mode\n");
+//        char  * plaintext=malloc(sizeof(char)*9);
+//        char * key=malloc(sizeof(char)*11);
+//        printf("Type plaintext\n");
+//        scanf("%s",plaintext);
+//
+//        printf("Type key\n");
+//        scanf("%s",key);
+//        plaintext[8]='\0';
+//        key[10]='\0';
+//        printf("The encrypted Text is %s\n",encrypt(plaintext,key));
+//    }else if (mode == '2'){
+//        printf("Decrypt mode\n");
+//        char * ciphertext=malloc(sizeof(char)*9);
+//        char * key=malloc(sizeof(char)*11);
+//        printf("Type ciphertext\n");
+//        scanf("%s",ciphertext);
+//        printf("Type key\n");
+//        scanf("%s",key);
+//        ciphertext[8]='\0';
+//        key[10]='\0';
+//        printf("The decrypted text is %s",decrypt(ciphertext,key));
+//    }else{
+//        printf("Starting brute force");
+//        printf("Reading from %s","C:\\Users\\mario\\Documents\\GitHub\\SDES\\newpares.txt");
+//        bruteForce();
+//    }
     return 0;
 }
