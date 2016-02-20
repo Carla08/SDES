@@ -271,7 +271,6 @@ void bruteForceKeyGenerator(char **plaintext, char **ciphertext){
                 int v1=strcmp(encryptionCheck,ciphertext[j]);
                 int v2=strcmp(decryptionCheck,plaintext[j]);
                 if( v1 || v2 ){
-                    printf("No es\n");
                     break;
                 }else if(j>100){
                     printf("La llave es %s\n",key);
@@ -329,7 +328,7 @@ char *** readPairs(char * filename, char ** plaintext,char ** ciphertext){
 
 
 void newPares (){
-    FILE *fp = fopen("C:\\Users\\mario\\Documents\\GitHub\\SDES\\newpares.txt", "w+");
+    FILE *fp = fopen("C:\\Users\\mario\\Documents\\GitHub\\SDES\\1001100110.txt", "w+");
     int i;
     char * plaintext;
     for (i = 0; i < 1000; ++i) {
